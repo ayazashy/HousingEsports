@@ -1,16 +1,21 @@
-# React + Vite
+# HousingEsports 🎮
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+المنصة الرسمية لبطولات الرياضات الإلكترونية وتصنيف اللاعبين — إدارة الإسكان الطلابي، جامعة الملك سعود.
 
-Currently, two official plugins are available:
+🌐 **رابط المنصة المباشر (GitHub Pages):**  
+[https://ayazashy.github.io/HousingEsports/](https://ayazashy.github.io/HousingEsports/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+### الوصف
+منصة ويب متكاملة لإدارة ومتابعة بطولات الرياضات الإلكترونية بالسكن الطلابي (مثل بطولة FC27)، تشمل القرعة وتوزيع المجموعات، تنظيم طوابير أجهزة الصالة، إدارة شجرة الإقصائيات، احتساب التصنيف التنافسي الرسمي (ELO)، وشاشات العرض التفاعلية المباشرة للجمهور.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+### أبرز النقاط
+* **بوابة كأس السكن:** واجهة مركزية موحدة لاستعراض البطولات، عدد المشاركين، وإجمالي المباريات.
+* **إدارة الصالة والأجهزة:** جدولة ذكية لمواعيد المباريات وتوزيعها على أجهزة الصالة مع احتساب فترات الاستراحة والصلاة.
+* **شجرة خروج المغلوب:** شجرة إقصائيات تفاعلية تدعم التأهل التلقائي وحساب أفضل الثواني وتتبع مسار المنافسين حتى النهائي.
+* **نظام تصنيف اللاعبين (ELO):** تصنيف رياضي معتمد ينطلق من 500 نقطة، يعتمد على قوة الخصوم، فارق الأهداف، ومضاعف الأدوار الإقصائية مع استبعاد المنسحبين.
+* **شاشة الجمهور والمتابعة المباشرة:** واجهة مخصصة للشاشات والزوار تتضمن بحثاً فورياً برقم الجوال عن جدول المباريات واحتفالاً تفاعلياً بالفوز.
+* **المزامنة السحابية الفورية:** حفظ ورصد حي لكافة النتائج والإحصائيات عبر Firebase Firestore مع دعم العمل دون اتصال والنسخ الاحتياطي.
