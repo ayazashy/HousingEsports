@@ -988,10 +988,10 @@ export default function App() {
           boxShadow: 'var(--shadow-sm)'
         }}>
           {/* Top Breadcrumb & Back Navigation to Housing Cup Portal */}
-          <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', marginBottom: '4px' }}>
+          <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', marginBottom: '4px', gap: '8px', flexWrap: 'wrap' }}>
             <button
               onClick={handleBackToPortal}
-              className="btn btn-secondary btn-sm"
+              className="btn btn-secondary btn-sm portal-back-btn"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1009,7 +1009,7 @@ export default function App() {
               <ArrowRight size={16} />
               <span>← العودة لبوابة كأس السكن</span>
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#64748B' }}>
+            <div className="portal-breadcrumb-text" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#64748B' }}>
               <span>كأس السكن الطلابية</span>
               <span>›</span>
               <span style={{ fontWeight: 800, color: '#0F172A' }}>بطولة FC27 الإلكترونية</span>
@@ -1017,17 +1017,19 @@ export default function App() {
           </div>
 
           {/* Centered & Separated Official Competition Logos */}
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '24px', width: '100%', flexWrap: 'wrap' }}>
+          <div className="portal-header-logos">
             <img 
               src={housingCupLogoUrl} 
               alt="شعار كأس السكن" 
-              style={{ height: '76px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))' }} 
+              className="portal-header-logo-img"
+              style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))' }} 
             />
-            <div style={{ width: '1px', height: '52px', background: 'var(--border-light)' }} />
+            <div className="portal-header-divider" />
             <img 
               src={fc27LogoUrl} 
               alt="شعار بطولة FC27" 
-              style={{ height: '76px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))' }} 
+              className="portal-header-logo-img"
+              style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))' }} 
             />
           </div>
 

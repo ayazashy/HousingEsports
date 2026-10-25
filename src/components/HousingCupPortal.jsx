@@ -95,106 +95,68 @@ export default function HousingCupPortal({
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#F8FAFC',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      padding: '48px 20px',
-      direction: 'rtl',
-      fontFamily: 'inherit'
-    }}>
+    <div className="portal-wrapper">
       {/* Centered Housing Cup Main Logo */}
-      <div style={{ marginBottom: '28px', textAlign: 'center' }}>
+      <div style={{ marginBottom: '24px', textAlign: 'center', width: '100%' }}>
         <img 
           src="./housingcup-logo.png" 
           alt="شعار كأس السكن" 
-          style={{
-            height: '130px',
-            width: 'auto',
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.06))'
-          }}
+          className="portal-main-logo"
           onError={(e) => { e.currentTarget.src = './logo.png'; }}
         />
       </div>
 
-      {/* Top Aggregated Stats: Total Participants & Games Played */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '16px',
-        marginBottom: '36px',
-        flexWrap: 'wrap',
-        width: '100%',
-        maxWidth: '850px'
-      }}>
+      {/* Top Aggregated Stats: Total Participants & Games Played (Responsive 2-column on phone) */}
+      <div className="portal-stats-grid">
         {/* Total Participants Stat Card */}
-        <div style={{
-          background: '#FFFFFF',
-          border: '1.5px solid #E2E8F0',
-          borderRadius: '16px',
-          padding: '12px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '14px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-          minWidth: '220px'
-        }}>
-          <div style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: '12px',
-            background: 'rgba(5, 150, 105, 0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--ksu-green)'
-          }}>
-            <Users size={22} />
+        <div className="portal-stat-card">
+          <div 
+            className="portal-stat-icon"
+            style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '12px',
+              background: 'rgba(5, 150, 105, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--ksu-green)'
+            }}
+          >
+            <Users size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0F172A', lineHeight: 1.1 }} className="numeric">
+            <div className="portal-stat-val numeric" style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0F172A', lineHeight: 1.1 }}>
               {totalParticipants}
             </div>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748B' }}>
+            <div className="portal-stat-lbl" style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748B' }}>
               إجمالي المشاركين
             </div>
           </div>
         </div>
 
         {/* Total Games Played Stat Card */}
-        <div style={{
-          background: '#FFFFFF',
-          border: '1.5px solid #E2E8F0',
-          borderRadius: '16px',
-          padding: '12px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '14px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-          minWidth: '220px'
-        }}>
-          <div style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: '12px',
-            background: 'rgba(2, 132, 199, 0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#0284C7'
-          }}>
-            <Gamepad2 size={22} />
+        <div className="portal-stat-card">
+          <div 
+            className="portal-stat-icon"
+            style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '12px',
+              background: 'rgba(2, 132, 199, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#0284C7'
+            }}
+          >
+            <Gamepad2 size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0F172A', lineHeight: 1.1 }} className="numeric">
+            <div className="portal-stat-val numeric" style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0F172A', lineHeight: 1.1 }}>
               {totalGamesPlayed}
             </div>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748B' }}>
+            <div className="portal-stat-lbl" style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748B' }}>
               المباريات الملعوبة
             </div>
           </div>
@@ -208,58 +170,29 @@ export default function HousingCupPortal({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '20px',
+        marginBottom: '16px',
         paddingBottom: '10px',
-        borderBottom: '2px solid #E2E8F0'
+        borderBottom: '2px solid #E2E8F0',
+        boxSizing: 'border-box'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Layers size={22} color="var(--ksu-green)" />
-          <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0F172A', margin: 0 }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0F172A', margin: 0 }}>
             البطولات
           </h2>
         </div>
-        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748B' }}>
+        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B' }}>
           {cups.length} {cups.length === 1 ? 'بطولة مسجلة' : 'بطولات مسجلة'}
         </span>
       </div>
 
-      {/* Cups Grid */}
-      <div style={{
-        width: '100%',
-        maxWidth: '850px',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 320px))',
-        gap: '24px',
-        justifyContent: 'center'
-      }}>
+      {/* Cups Grid (Single column on mobile, responsive on desktop) */}
+      <div className="portal-cups-grid">
         {cups.map((cup) => (
           <div
             key={cup.id}
             onClick={() => onSelectCup(cup.id)}
-            style={{
-              background: '#FFFFFF',
-              border: '1.5px solid #E2E8F0',
-              borderRadius: '18px',
-              padding: '28px 24px 20px',
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.25s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              userSelect: 'none'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.08)';
-              e.currentTarget.style.borderColor = 'var(--ksu-green)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
-              e.currentTarget.style.borderColor = '#E2E8F0';
-            }}
+            className="portal-cup-card"
           >
             {/* Tournament Date Badge */}
             {cup.dates && (
