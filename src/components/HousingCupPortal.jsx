@@ -393,6 +393,27 @@ export default function HousingCupPortal({
         </div>
       )}
 
+      {/* Official Footer */}
+      <footer style={{
+        marginTop: 'auto',
+        paddingTop: '48px',
+        paddingBottom: '16px',
+        textAlign: 'center',
+        width: '100%',
+        maxWidth: '850px'
+      }}>
+        <div style={{
+          borderTop: '1px solid #E2E8F0',
+          paddingTop: '20px',
+          fontSize: '0.82rem',
+          color: '#64748B',
+          fontWeight: 700,
+          lineHeight: 1.8
+        }}>
+          تنظيم لجنة الابتكار والتطوير التقني - وحدة الأنشطة الطلابية - إدارة الإسكان الطلابي - عمادة شؤون الطلاب - جامعة الملك سعود
+        </div>
+      </footer>
+
       {/* Master Admin Modal (Hidden for public) */}
       {isMasterAdmin && showAddCupModal && (
         <div style={{

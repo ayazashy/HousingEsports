@@ -1130,6 +1130,20 @@ export default function App() {
           />
         </main>
 
+        {/* Official Footer */}
+        <footer style={{
+          padding: '24px 20px',
+          textAlign: 'center',
+          borderTop: '1px solid var(--border-light)',
+          background: '#FFFFFF',
+          fontSize: '0.82rem',
+          color: '#64748B',
+          fontWeight: 700,
+          lineHeight: 1.8
+        }}>
+          تنظيم لجنة الابتكار والتطوير التقني - وحدة الأنشطة الطلابية - إدارة الإسكان الطلابي - عمادة شؤون الطلاب - جامعة الملك سعود
+        </footer>
+
         {/* Interactive Winning Celebration Modal with Corner-to-Corner Diagonal Motion */}
         {celebrationQueue.length > 0 && celebrationQueue[celebrationIndex] && (
           <WinningCelebrationModal
