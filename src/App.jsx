@@ -6,6 +6,7 @@ import MatchesTab from './components/MatchesTab';
 import KnockoutTab from './components/KnockoutTab';
 import TvDisplayTab from './components/TvDisplayTab';
 import StatisticsTab from './components/StatisticsTab';
+import EloLeaderboardTab from './components/EloLeaderboardTab';
 import SettingsTab from './components/SettingsTab';
 import ScheduleDaysTab from './components/ScheduleDaysTab';
 import AdminAdjustMatchModal from './components/AdminAdjustMatchModal';
@@ -1400,6 +1401,14 @@ export default function App() {
             <span>الإحصائيات والجوائز</span>
           </button>
 
+          <button 
+            className={`tab-btn ${activeTab === 'elo' ? 'active' : ''}`}
+            onClick={() => setActiveTab('elo')}
+          >
+            <Trophy size={18} />
+            <span>تصنيف لاعبي فيفا بالسكن</span>
+          </button>
+
           {userRole !== 'coordinator' && (
             <button 
               className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
@@ -1492,6 +1501,14 @@ export default function App() {
           <StatisticsTab
             matches={matches}
             participants={participants}
+          />
+        )}
+
+        {activeTab === 'elo' && (
+          <EloLeaderboardTab
+            matches={matches}
+            participants={participants}
+            isPublicMode={false}
           />
         )}
 

@@ -23,6 +23,7 @@ import WhatsAppReminderModal from './WhatsAppReminderModal';
 import SportsMatchCard from './SportsMatchCard';
 import AutoFitName from './AutoFitName';
 import { getConsoleStatusMap, rebalanceRemainingMatches, syncKnockoutTreeWithGuarantees, propagateWinnerInTree } from '../utils/tournamentEngine';
+import { simulateTournamentElo } from '../utils/eloEngine';
 import { getTeamLogoUrl, DEFAULT_UNKNOWN_LOGO } from '../utils/footballTeams';
 
 export default function MatchesTab({ 
@@ -68,6 +69,10 @@ export default function MatchesTab({
     participants.forEach(p => { map[p.id] = p; });
     return map;
   }, [participants]);
+
+  const tournamentEloResult = useMemo(() => {
+    return simulateTournamentElo(matches, participants);
+  }, [matches, participants]);
 
   const minDuration = Number(config.minMatchDuration) || 10;
   const maxDuration = Number(config.maxMatchDuration) || 15;
@@ -651,6 +656,7 @@ export default function MatchesTab({
                             isCurrent={true}
                             onSelectMatch={setSelectedMatch}
                             onRemindMatch={setReminderMatch}
+                            eloDelta={tournamentEloResult.matchDeltas[current.id]}
                           />
 
                           {/* Action Buttons: Direct Score Record + WhatsApp Reminder */}
@@ -707,6 +713,7 @@ export default function MatchesTab({
                         onSelectMatch={setSelectedMatch}
                         onRemindMatch={setReminderMatch}
                         compact={true}
+                        eloDelta={tournamentEloResult.matchDeltas[next.id]}
                       />
                     </div>
                   )}
@@ -737,6 +744,7 @@ export default function MatchesTab({
                             onSelectMatch={setSelectedMatch}
                             onRemindMatch={setReminderMatch}
                             compact={true}
+                            eloDelta={tournamentEloResult.matchDeltas[m.id]}
                           />
                         );
                       })}
@@ -861,7 +869,24 @@ export default function MatchesTab({
                         color="var(--text-main)"
                         align="right"
                       />
-                      <span className="player-team">{p1?.team}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-start' }}>
+                        <span className="player-team">{p1?.team}</span>
+                        {isCompleted && match.status === 'completed' && tournamentEloResult.matchDeltas[match.id]?.p1Delta !== undefined && (
+                          <span 
+                            className="numeric"
+                            style={{
+                              fontSize: '0.64rem',
+                              fontWeight: 800,
+                              padding: '0 4px',
+                              borderRadius: '3px',
+                              background: tournamentEloResult.matchDeltas[match.id].p1Delta > 0 ? '#DCFCE7' : '#FEE2E2',
+                              color: tournamentEloResult.matchDeltas[match.id].p1Delta > 0 ? '#15803D' : '#B91C1C'
+                            }}
+                          >
+                            {tournamentEloResult.matchDeltas[match.id].p1Delta > 0 ? `+${tournamentEloResult.matchDeltas[match.id].p1Delta}` : tournamentEloResult.matchDeltas[match.id].p1Delta}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="match-score-badge">
@@ -879,7 +904,24 @@ export default function MatchesTab({
                         color="var(--text-main)"
                         align="left"
                       />
-                      <span className="player-team">{p2?.team}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                        {isCompleted && match.status === 'completed' && tournamentEloResult.matchDeltas[match.id]?.p2Delta !== undefined && (
+                          <span 
+                            className="numeric"
+                            style={{
+                              fontSize: '0.64rem',
+                              fontWeight: 800,
+                              padding: '0 4px',
+                              borderRadius: '3px',
+                              background: tournamentEloResult.matchDeltas[match.id].p2Delta > 0 ? '#DCFCE7' : '#FEE2E2',
+                              color: tournamentEloResult.matchDeltas[match.id].p2Delta > 0 ? '#15803D' : '#B91C1C'
+                            }}
+                          >
+                            {tournamentEloResult.matchDeltas[match.id].p2Delta > 0 ? `+${tournamentEloResult.matchDeltas[match.id].p2Delta}` : tournamentEloResult.matchDeltas[match.id].p2Delta}
+                          </span>
+                        )}
+                        <span className="player-team">{p2?.team}</span>
+                      </div>
                     </div>
                   </div>
 

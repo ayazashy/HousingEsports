@@ -19,7 +19,8 @@ export default function SportsMatchCard({
   onRemindMatch,
   onShowCelebration,
   compact = false,
-  isPublicMode = false
+  isPublicMode = false,
+  eloDelta = null
 }) {
   const p1Logo = getTeamLogoUrl(p1?.team);
   const p2Logo = getTeamLogoUrl(p2?.team);
@@ -32,6 +33,11 @@ export default function SportsMatchCard({
   const showTeam2 = !hasKnownLogo2 && !!p2?.team;
 
   const isCompleted = isDone || match.status === 'completed' || match.status === 'walkover';
+  const isRealMatchPlayed = match.status === 'completed' && match.score1 !== null && match.score2 !== null;
+  const effectiveEloDelta = eloDelta || match._eloDelta || null;
+  const p1Delta = isRealMatchPlayed && effectiveEloDelta?.p1Delta !== undefined ? effectiveEloDelta.p1Delta : null;
+  const p2Delta = isRealMatchPlayed && effectiveEloDelta?.p2Delta !== undefined ? effectiveEloDelta.p2Delta : null;
+
   const hasPenalties = match.penalty1 !== null && match.penalty1 !== undefined &&
                        match.penalty2 !== null && match.penalty2 !== undefined;
 
@@ -63,7 +69,9 @@ export default function SportsMatchCard({
             ركلات ترجيح ({match.penalty1} - {match.penalty2})
           </span>
         ) : (
-          <span style={{ fontSize: '0.62rem', color: '#059669', fontWeight: 800 }}>منتهية ✓</span>
+          <span style={{ fontSize: '0.62rem', color: '#059669', fontWeight: 800 }}>
+            {match.status === 'walkover' ? 'انسحاب' : 'منتهية ✓'}
+          </span>
         )}
       </div>
     );
@@ -165,19 +173,47 @@ export default function SportsMatchCard({
             fontWeight={800}
             align="right"
           />
-          {showTeam1 && (
-            <div style={{ 
-              fontSize: '0.62rem', 
-              color: 'var(--text-muted)', 
-              whiteSpace: 'nowrap', 
-              overflow: 'hidden', 
-              textOverflow: 'ellipsis',
-              textAlign: 'right',
-              marginTop: '1px'
-            }}>
-              {p1.team}
-            </div>
-          )}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '4px', 
+            justifyContent: 'flex-start',
+            marginTop: '1px',
+            flexWrap: 'nowrap',
+            overflow: 'hidden'
+          }}>
+            {showTeam1 && (
+              <span style={{ 
+                fontSize: '0.62rem', 
+                color: 'var(--text-muted)', 
+                whiteSpace: 'nowrap', 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis'
+              }}>
+                {p1.team}
+              </span>
+            )}
+            {p1Delta !== null && (
+              <span 
+                className="numeric"
+                style={{
+                  fontSize: '0.62rem',
+                  fontWeight: 800,
+                  padding: '0px 4px',
+                  borderRadius: '3px',
+                  background: p1Delta > 0 ? '#DCFCE7' : (p1Delta < 0 ? '#FEE2E2' : '#F1F5F9'),
+                  color: p1Delta > 0 ? '#15803D' : (p1Delta < 0 ? '#B91C1C' : '#475569'),
+                  border: `1px solid ${p1Delta > 0 ? '#86EFAC' : (p1Delta < 0 ? '#FCA5A5' : '#CBD5E1')}`,
+                  lineHeight: '13px',
+                  display: 'inline-block',
+                  whiteSpace: 'nowrap'
+                }}
+                title={`تغير تصنيف ELO: ${p1Delta > 0 ? '+' : ''}${p1Delta}`}
+              >
+                {p1Delta > 0 ? `+${p1Delta}` : p1Delta}
+              </span>
+            )}
+          </div>
         </div>
         {p1Logo ? (
           <img 
@@ -257,19 +293,47 @@ export default function SportsMatchCard({
             fontWeight={800}
             align="left"
           />
-          {showTeam2 && (
-            <div style={{ 
-              fontSize: '0.62rem', 
-              color: 'var(--text-muted)', 
-              whiteSpace: 'nowrap', 
-              overflow: 'hidden', 
-              textOverflow: 'ellipsis',
-              textAlign: 'left',
-              marginTop: '1px'
-            }}>
-              {p2.team}
-            </div>
-          )}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '4px', 
+            justifyContent: 'flex-end',
+            marginTop: '1px',
+            flexWrap: 'nowrap',
+            overflow: 'hidden'
+          }}>
+            {p2Delta !== null && (
+              <span 
+                className="numeric"
+                style={{
+                  fontSize: '0.62rem',
+                  fontWeight: 800,
+                  padding: '0px 4px',
+                  borderRadius: '3px',
+                  background: p2Delta > 0 ? '#DCFCE7' : (p2Delta < 0 ? '#FEE2E2' : '#F1F5F9'),
+                  color: p2Delta > 0 ? '#15803D' : (p2Delta < 0 ? '#B91C1C' : '#475569'),
+                  border: `1px solid ${p2Delta > 0 ? '#86EFAC' : (p2Delta < 0 ? '#FCA5A5' : '#CBD5E1')}`,
+                  lineHeight: '13px',
+                  display: 'inline-block',
+                  whiteSpace: 'nowrap'
+                }}
+                title={`تغير تصنيف ELO: ${p2Delta > 0 ? '+' : ''}${p2Delta}`}
+              >
+                {p2Delta > 0 ? `+${p2Delta}` : p2Delta}
+              </span>
+            )}
+            {showTeam2 && (
+              <span style={{ 
+                fontSize: '0.62rem', 
+                color: 'var(--text-muted)', 
+                whiteSpace: 'nowrap', 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis'
+              }}>
+                {p2.team}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

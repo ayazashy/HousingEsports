@@ -1,6 +1,7 @@
 import React from 'react';
-import { Award, Trophy, Shield, HeartHandshake, Flame, BarChart3 } from 'lucide-react';
+import { Award, Trophy, Shield, HeartHandshake, Flame, BarChart3, Star } from 'lucide-react';
 import { getTeamLogoUrl, DEFAULT_UNKNOWN_LOGO } from '../utils/footballTeams';
+import { simulateTournamentElo } from '../utils/eloEngine';
 
 export default function StatisticsTab({ 
   matches, 
@@ -80,6 +81,12 @@ export default function StatisticsTab({
     const penaltyB = (b.yellowCards * 1) + (b.redCards * 3);
     return penaltyA - penaltyB;
   }).slice(0, 5);
+
+  // Top 5 FC27 ELO Leaders
+  const eloLeaders = React.useMemo(() => {
+    const res = simulateTournamentElo(matches, participants);
+    return res.rankedPlayers.slice(0, 5);
+  }, [matches, participants]);
 
   return (
     <div className="tab-content">
@@ -306,6 +313,80 @@ export default function StatisticsTab({
                       <td className="numeric">{st.played}</td>
                       <td className="numeric" style={{ textAlign: 'center' }}>
                         {st.yellowCards}🟨 {st.redCards > 0 ? `${st.redCards}🟥` : ''}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* 4. Top FC27 ELO Rating Leaders */}
+        <div className="clean-card">
+          <div className="card-header">
+            <div className="card-title">
+              <Star size={20} color="#D97706" />
+              <span>درع تصنيف لاعبي فيفا بالسكن (أعلى ELO)</span>
+            </div>
+            <span className="badge badge-gold">نخبة اللاعبين 💎</span>
+          </div>
+
+          {eloLeaders.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', padding: '16px 0' }}>
+              لا توجد مباريات مكتملة لاحتساب التقييم.
+            </p>
+          ) : (
+            <div className="table-wrapper" style={{ border: 'none' }}>
+              <table className="clean-table" style={{ fontSize: '0.85rem' }}>
+                <thead>
+                  <tr>
+                    <th style={{ width: '36px' }}>م</th>
+                    <th>اللاعب</th>
+                    <th>السكن</th>
+                    <th style={{ textAlign: 'center', color: '#D97706' }}>تقييم ELO</th>
+                    <th style={{ textAlign: 'center' }}>التغير (Δ)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {eloLeaders.map((p, i) => (
+                    <tr key={p.id}>
+                      <td className="numeric" style={{ fontWeight: 800 }}>
+                        {i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : `#${i + 1}`))}
+                      </td>
+                      <td>
+                        {(() => {
+                          const logo = getTeamLogoUrl(p.team);
+                          const hasKnown = !!logo && logo !== DEFAULT_UNKNOWN_LOGO;
+                          return (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {logo && (
+                                <img 
+                                  src={logo} 
+                                  alt={p.team || ''} 
+                                  title={p.team || ''} 
+                                  style={{ width: '20px', height: '20px', objectFit: 'contain' }}
+                                  onError={(e) => { e.target.src = DEFAULT_UNKNOWN_LOGO; }}
+                                />
+                              )}
+                              <div>
+                                <span style={{ fontWeight: 700 }}>{p.name}</span>
+                                {(!hasKnown && p.team) && (
+                                  <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>{p.team}</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      <td style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                        م {p.building || '—'} / غ {p.room || '—'}
+                      </td>
+                      <td className="numeric" style={{ textAlign: 'center', fontWeight: 900, fontSize: '1rem', color: '#B45309' }}>
+                        {p.elo}
+                      </td>
+                      <td className="numeric" style={{ textAlign: 'center', fontWeight: 800, color: '#15803D' }}>
+                        +{p.deltaTotal}
                       </td>
                     </tr>
                   ))}

@@ -1638,5 +1638,19 @@ body {
   }
 }
 
+/* ==========================================================================
+   FC27 ELO Rating System & Leaderboard Styles
+   ========================================================================== */
+.elo-table-row:hover {
+  background-color: #F0FDF4 !important;
+}
 
+.elo-table-row:active {
+  background-color: #DCFCE7 !important;
+}
 
+@media (max-width: 768px) {
+  .elo-tab-container {
+    gap: 14px;
+  }
+}

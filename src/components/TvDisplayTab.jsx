@@ -5,6 +5,8 @@ import { getTeamLogoUrl, DEFAULT_UNKNOWN_LOGO } from '../utils/footballTeams';
 import KnockoutTree from './KnockoutTree';
 import SyncLoadingOverlay from './SyncLoadingOverlay';
 import SportsMatchCard from './SportsMatchCard';
+import EloLeaderboardTab from './EloLeaderboardTab';
+import { simulateTournamentElo } from '../utils/eloEngine';
 import logoUrl from '../utils/logo';
 
 // Helper: Extract all raw digits written (handling Arabic-Indic numerals)
@@ -62,7 +64,7 @@ export default function TvDisplayTab({
   onShowCelebration,
   isLoading = false
 }) {
-  const [activeTab, setActiveTab] = useState('consoles'); // 'consoles', 'standings', 'tree', 'scorers'
+  const [activeTab, setActiveTab] = useState('consoles'); // 'consoles', 'standings', 'tree', 'scorers', 'elo'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isAutoRotate, setIsAutoRotate] = useState(!isPublicMode);
   const [playerSearch, setPlayerSearch] = useState('');
@@ -90,6 +92,11 @@ export default function TvDisplayTab({
     participants.forEach(p => { map[p.id] = p; });
     return map;
   }, [participants]);
+
+  // Compute tournament-wide ELO results and per-match deltas
+  const tournamentEloResult = React.useMemo(() => {
+    return simulateTournamentElo(matches, participants);
+  }, [matches, participants]);
 
   const minDuration = Number(config.minMatchDuration) || 10;
   const maxDuration = Number(config.maxMatchDuration) || 15;
@@ -146,7 +153,7 @@ export default function TvDisplayTab({
   // Auto-rotate tabs for projector display (18 seconds per tab)
   useEffect(() => {
     if (!isAutoRotate || isPublicMode) return;
-    const tabs = ['consoles', 'standings', 'tree', 'scorers'];
+    const tabs = ['consoles', 'standings', 'tree', 'scorers', 'elo'];
     const timer = setInterval(() => {
       setActiveTab(prev => {
         const curIdx = tabs.indexOf(prev);
@@ -419,6 +426,22 @@ export default function TvDisplayTab({
             >
               الهدافون
             </button>
+            <button 
+              className={`btn btn-sm ${activeTab === 'elo' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ 
+                padding: '6px 14px', 
+                border: 'none', 
+                whiteSpace: 'nowrap', 
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+              onClick={() => setActiveTab('elo')}
+            >
+              <span>🏆</span>
+              <span>تصنيف لاعبي فيفا بالسكن</span>
+            </button>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -660,6 +683,7 @@ export default function TvDisplayTab({
                             compact={false}
                             isPublicMode={isPublicMode}
                             onShowCelebration={onShowCelebration}
+                            eloDelta={tournamentEloResult.matchDeltas[m.id]}
                           />
 
                           {/* Status & Outcome Banner */}
@@ -839,6 +863,7 @@ export default function TvDisplayTab({
                         isPublicMode={isPublicMode}
                         onShowCelebration={onShowCelebration}
                         compact={false}
+                        eloDelta={tournamentEloResult.matchDeltas[current.id]}
                       />
                     ) : (
                       isCurrentlyInBreak ? (
@@ -885,6 +910,7 @@ export default function TvDisplayTab({
                       compact={true}
                       isPublicMode={isPublicMode}
                       onShowCelebration={onShowCelebration}
+                      eloDelta={tournamentEloResult.matchDeltas[next.id]}
                     />
                   </div>
                 )}
@@ -949,6 +975,7 @@ export default function TvDisplayTab({
                                 compact={true}
                                 isPublicMode={isPublicMode}
                                 onShowCelebration={onShowCelebration}
+                                eloDelta={tournamentEloResult.matchDeltas[m.id]}
                               />
                             </div>
                           </div>
@@ -1101,6 +1128,15 @@ export default function TvDisplayTab({
             </table>
           </div>
         </div>
+      )}
+
+      {/* TAB 5: FC27 ELO Leaderboard (تصنيف لاعبي فيفا بالسكن) */}
+      {activeTab === 'elo' && (
+        <EloLeaderboardTab
+          matches={matches}
+          participants={participants}
+          isPublicMode={isPublicMode}
+        />
       )}
 
       {/* Bottom Announcement Ticker */}

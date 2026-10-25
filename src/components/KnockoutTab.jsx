@@ -4,6 +4,7 @@ import { generateKnockoutTree, calculateBestRunnersUp, propagateWinnerInTree, ge
 import { getTeamLogoUrl, DEFAULT_UNKNOWN_LOGO } from '../utils/footballTeams';
 import KnockoutTree from './KnockoutTree';
 import SportsMatchCard from './SportsMatchCard';
+import { simulateTournamentElo } from '../utils/eloEngine';
 import ScoreModal from './ScoreModal';
 import WhatsAppReminderModal from './WhatsAppReminderModal';
 
@@ -29,6 +30,10 @@ export default function KnockoutTab({
     participants.forEach(p => { map[p.id] = p; });
     return map;
   }, [participants]);
+
+  const tournamentEloResult = useMemo(() => {
+    return simulateTournamentElo(matches, participants);
+  }, [matches, participants]);
 
   const knockoutMatches = useMemo(() => matches.filter(m => m.stage !== 'group'), [matches]);
   const consolesCount = Math.max(1, Number(config.consolesCount) || 5);
@@ -416,6 +421,7 @@ export default function KnockoutTab({
                           isCurrent={true}
                           onSelectMatch={setSelectedMatch}
                           onRemindMatch={setReminderMatch}
+                          eloDelta={tournamentEloResult.matchDeltas[current.id]}
                         />
                         <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
                           <button 
@@ -471,6 +477,7 @@ export default function KnockoutTab({
                         onSelectMatch={setSelectedMatch}
                         onRemindMatch={setReminderMatch}
                         compact={true}
+                        eloDelta={tournamentEloResult.matchDeltas[next.id]}
                       />
                     </div>
                   )}
@@ -501,6 +508,7 @@ export default function KnockoutTab({
                             onSelectMatch={setSelectedMatch}
                             onRemindMatch={setReminderMatch}
                             compact={true}
+                            eloDelta={tournamentEloResult.matchDeltas[m.id]}
                           />
                         );
                       })}
@@ -569,6 +577,7 @@ export default function KnockoutTab({
                       isDone={isDone}
                       onSelectMatch={setSelectedMatch}
                       onRemindMatch={setReminderMatch}
+                      eloDelta={tournamentEloResult.matchDeltas[match.id]}
                     />
                   </div>
                 );
