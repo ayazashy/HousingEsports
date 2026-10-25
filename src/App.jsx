@@ -23,19 +23,25 @@ import {
   ExternalLink,
   Share2,
   RefreshCw,
-  Lock
+  Lock,
+  ArrowRight
 } from 'lucide-react';
 import { 
   saveTournamentToFirestore, 
   loadTournamentFromFirestore, 
   subscribeToTournament,
   atomicUpdateTournamentInFirestore,
-  atomicUpdateMatchesInFirestore
+  atomicUpdateMatchesInFirestore,
+  loadCupsRegistryFromFirestore,
+  saveCupsRegistryToFirestore,
+  subscribeToCupsRegistry,
+  DEFAULT_CUPS_LIST
 } from './firebase';
 import AdminLockScreen from './components/AdminLockScreen';
 import SyncLoadingOverlay from './components/SyncLoadingOverlay';
 import WinningCelebrationModal from './components/WinningCelebrationModal';
-import logoUrl from './utils/logo';
+import HousingCupPortal from './components/HousingCupPortal';
+import logoUrl, { fc27LogoUrl, housingCupLogoUrl } from './utils/logo';
 import { 
   isKsuStaffRoute, 
   getStoredAdminKey, 
@@ -267,6 +273,17 @@ export default function App() {
   const [adminSecretCode, setAdminSecretCode] = useState(null);
   const [isCheckingStoredKey, setIsCheckingStoredKey] = useState(true);
 
+  // Cups Registry & Tournament Selection State
+  const [cupsList, setCupsList] = useState(DEFAULT_CUPS_LIST);
+  const [selectedCupId, setSelectedCupId] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('cup') || null;
+    } catch (e) {
+      return null;
+    }
+  });
+
   // Public Rate Limit Timer & Share state (persisted across reloads)
   const [publicTimerSeconds, setPublicTimerSeconds] = useState(getInitialTimerRemaining);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
@@ -381,6 +398,8 @@ export default function App() {
     // Listen to URL navigation (back/forward or pushState)
     const handleLocationChange = () => {
       setIsAdminRoute(isKsuStaffRoute());
+      const params = new URLSearchParams(window.location.search);
+      setSelectedCupId(params.get('cup') || null);
     };
     window.addEventListener('popstate', handleLocationChange);
 
@@ -574,6 +593,62 @@ export default function App() {
     setUserRole('master_admin');
     setAdminSecretCode(null);
     showNotification('تم قفل لوحة الإدارة بنجاح 🔒', 'info');
+  };
+
+  // Realtime synchronization with Firestore Cups Registry
+  useEffect(() => {
+    const unsub = subscribeToCupsRegistry(
+      (cloudCups) => {
+        if (Array.isArray(cloudCups) && cloudCups.length > 0) {
+          setCupsList(cloudCups);
+        }
+      },
+      (err) => {
+        console.warn('Cups registry sync issue:', err);
+      }
+    );
+    return () => {
+      if (typeof unsub === 'function') unsub();
+    };
+  }, []);
+
+  const handleSelectCup = (cupOrId) => {
+    const id = typeof cupOrId === 'string' ? cupOrId : cupOrId?.id;
+    if (!id) return;
+    setSelectedCupId(id);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('cup', id);
+      window.history.pushState({}, '', url.toString());
+    } catch (e) {}
+  };
+
+  const handleBackToPortal = () => {
+    setSelectedCupId(null);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('cup');
+      window.history.pushState({}, '', url.toString());
+    } catch (e) {}
+  };
+
+  const handleSaveCupsList = async (updatedList) => {
+    setCupsList(updatedList);
+    const res = await saveCupsRegistryToFirestore(updatedList, adminSecretCode);
+    if (!res.success) {
+      showNotification('تعذر حفظ قائمة البطولات في السحابة', 'error');
+    } else {
+      showNotification('تم تحديث قائمة بطولات كأس السكن سحابياً بنجاح! 🏆', 'success');
+    }
+  };
+
+  const handleOpenAdminLoginFromPortal = () => {
+    setIsAdminRoute(true);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('KSUHTSTAFF', '');
+      window.history.pushState({}, '', url.toString());
+    } catch (e) {}
   };
 
   // 3. Multi-Admin Concurrency-Safe Atomic Match Update (Prevents race conditions)
@@ -785,7 +860,115 @@ export default function App() {
 
   const completedMatchesCount = matches.filter(m => m.status === 'completed' || m.status === 'walkover').length;
 
-  // 6. IF NOT ON ADMIN ROUTE (/KSUHTSTAFF): Render dedicated student spectator portal with single unified header
+  // 6. CENTRAL HOUSING CUP PORTAL (LANDING PAGE)
+  // When no specific cup is chosen (?cup= is omitted or null), render Housing Cup Portal
+  if (!selectedCupId) {
+    if (isAdminRoute && isCheckingStoredKey) {
+      return (
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#0F172A',
+          color: '#FFFFFF'
+        }}>
+          <img src={housingCupLogoUrl} alt="شعار كأس السكن" style={{ height: '72px', marginBottom: '16px' }} />
+          <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#38BDF8', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="spinner" style={{ width: '16px', height: '16px', border: '2px solid #38BDF8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+            <span>جاري التحقق من مفتاح فك التشفير...</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (isAdminRoute && !isUnlocked) {
+      return (
+        <AdminLockScreen
+          config={config}
+          onUnlockSuccess={(payload, key, role) => {
+            setIsUnlocked(true);
+            setUserRole(role);
+            setAdminSecretCode(payload.secretCode);
+            showNotification(role === 'coordinator' ? 'مرحباً بك في بوابة منظم الصالة! 🎮' : 'تم فك تشفير لوحة الإدارة بنجاح! 🔓', 'success');
+          }}
+          onGoToPublic={handleNavigateToPublic}
+        />
+      );
+    }
+
+    return (
+      <>
+        {notification && (
+          <div style={{
+            position: 'fixed',
+            bottom: '24px',
+            left: '24px',
+            zIndex: 9999,
+            background: notification.type === 'error' ? '#DC2626' : (notification.type === 'success' ? '#047857' : '#1E293B'),
+            color: '#FFFFFF',
+            padding: '12px 20px',
+            borderRadius: '8px',
+            boxShadow: 'var(--shadow-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            fontSize: '0.9rem',
+            fontWeight: 600
+          }}>
+            {notification.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+            <span>{notification.message}</span>
+          </div>
+        )}
+        <HousingCupPortal
+          cups={cupsList}
+          onSelectCup={handleSelectCup}
+          userRole={isUnlocked ? userRole : null}
+          isAdminRoute={isAdminRoute}
+          onOpenAdminLogin={handleOpenAdminLoginFromPortal}
+          onLogoutAdmin={handleLockDashboard}
+          onSaveCupsList={handleSaveCupsList}
+          onNotify={showNotification}
+        />
+      </>
+    );
+  }
+
+  // 7. OTHER REGISTERED CUPS PREVIEW (if not fc27)
+  if (selectedCupId !== 'fc27') {
+    const curCup = cupsList.find(c => c.id === selectedCupId) || {
+      title: 'بطولة كأس السكن',
+      game: 'منافسة رياضية',
+      dates: 'قريباً',
+      statusLabel: 'قيد التجهيز ⏳'
+    };
+    return (
+      <div style={{ minHeight: '100vh', background: '#F8FAFC', color: 'var(--text-main)', padding: '24px', direction: 'rtl' }}>
+        <header style={{ maxWidth: '850px', margin: '0 auto 30px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px' }}>
+          <button 
+            className="btn btn-secondary btn-sm"
+            onClick={handleBackToPortal}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: 'var(--ksu-green)' }}
+          >
+            <ArrowRight size={16} />
+            <span>← العودة إلى بوابة كأس السكن</span>
+          </button>
+          <img src={housingCupLogoUrl} alt="شعار كأس السكن" style={{ height: '48px', objectFit: 'contain' }} />
+        </header>
+        <div style={{ maxWidth: '600px', margin: '40px auto', textAlign: 'center', background: '#FFFFFF', border: '1.5px solid #E2E8F0', borderRadius: '20px', padding: '40px 24px', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
+          <img src={curCup.logo || housingCupLogoUrl} alt="شعار البطولة" style={{ height: '110px', objectFit: 'contain', marginBottom: '24px' }} />
+          <div>
+            <button className="btn btn-primary" onClick={handleBackToPortal} style={{ padding: '10px 24px', fontWeight: 800 }}>
+              الرجوع إلى سجل بطولات كأس السكن
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 8. FC27 CUP - PUBLIC SPECTATOR PORTAL
   if (!isAdminRoute) {
     return (
       <div className="app-layout" style={{ background: '#F8FAFC' }}>
@@ -804,13 +987,47 @@ export default function App() {
           zIndex: 40,
           boxShadow: 'var(--shadow-sm)'
         }}>
-          {/* Centered & Large Official Competition Logo */}
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+          {/* Top Breadcrumb & Back Navigation to Housing Cup Portal */}
+          <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', marginBottom: '4px' }}>
+            <button
+              onClick={handleBackToPortal}
+              className="btn btn-secondary btn-sm"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                color: 'var(--ksu-green)',
+                background: '#ECFDF5',
+                borderColor: '#A7F3D0',
+                padding: '6px 14px',
+                borderRadius: '8px'
+              }}
+              title="العودة إلى بوابة كأس السكن لجميع البطولات"
+            >
+              <ArrowRight size={16} />
+              <span>← العودة لبوابة كأس السكن</span>
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#64748B' }}>
+              <span>كأس السكن الطلابية</span>
+              <span>›</span>
+              <span style={{ fontWeight: 800, color: '#0F172A' }}>بطولة FC27 الإلكترونية</span>
+            </div>
+          </div>
+
+          {/* Centered & Separated Official Competition Logos */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '24px', width: '100%', flexWrap: 'wrap' }}>
             <img 
-              src={logoUrl} 
-              alt="شعار كأس السكن FC27" 
-              className="brand-logo"
-              style={{ height: '100px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.06))' }} 
+              src={housingCupLogoUrl} 
+              alt="شعار كأس السكن" 
+              style={{ height: '76px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))' }} 
+            />
+            <div style={{ width: '1px', height: '52px', background: 'var(--border-light)' }} />
+            <img 
+              src={fc27LogoUrl} 
+              alt="شعار بطولة FC27" 
+              style={{ height: '76px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))' }} 
             />
           </div>
 
@@ -852,13 +1069,13 @@ export default function App() {
             <button 
               className="btn btn-secondary btn-sm"
               onClick={() => {
-                const url = window.location.origin + window.location.pathname;
+                const url = window.location.origin + window.location.pathname + '?cup=fc27';
                 navigator.clipboard.writeText(url);
                 setCopiedShareLink(true);
                 setTimeout(() => setCopiedShareLink(false), 2500);
-                showNotification('تم نسخ رابط البطولة لمشاركته!', 'success');
+                showNotification('تم نسخ رابط بطولة FC27 لمشاركته!', 'success');
               }}
-              title="مشاركة رابط البطولة"
+              title="مشاركة رابط بطولة FC27"
               style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
             >
               {copiedShareLink ? <CheckCircle2 size={14} color="#10B981" /> : <Share2 size={14} />}
@@ -961,7 +1178,7 @@ export default function App() {
         background: '#0F172A',
         color: '#FFFFFF'
       }}>
-        <img src={logoUrl} alt="شعار البطولة" style={{ height: '72px', marginBottom: '16px' }} />
+        <img src={housingCupLogoUrl} alt="شعار كأس السكن" style={{ height: '72px', marginBottom: '16px' }} />
         <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#38BDF8', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span className="spinner" style={{ width: '16px', height: '16px', border: '2px solid #38BDF8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
           <span>جاري التحقق من مفتاح فك التشفير...</span>
@@ -1029,13 +1246,34 @@ export default function App() {
           gap: '12px',
           boxShadow: 'var(--shadow-sm)'
         }}>
-          {/* Centered Large Official Logo */}
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+          {/* Top Breadcrumb & Back to Portal for Coordinator */}
+          <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>
+            <button
+              onClick={handleBackToPortal}
+              className="btn btn-secondary btn-sm"
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: 'var(--ksu-green)' }}
+              title="العودة إلى بوابة كأس السكن الرئيسية"
+            >
+              <ArrowRight size={15} />
+              <span>← العودة لبوابة كأس السكن</span>
+            </button>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+              منظم الصالة • بطولة FC27
+            </div>
+          </div>
+
+          {/* Centered Large Official Logos */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', width: '100%' }}>
             <img 
-              src={logoUrl} 
-              alt="شعار البطولة" 
-              className="brand-logo"
-              style={{ height: '96px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.06))' }} 
+              src={housingCupLogoUrl} 
+              alt="شعار كأس السكن" 
+              style={{ height: '68px', width: 'auto', objectFit: 'contain' }} 
+            />
+            <div style={{ width: '1px', height: '46px', background: 'var(--border-light)' }} />
+            <img 
+              src={fc27LogoUrl} 
+              alt="شعار بطولة FC27" 
+              style={{ height: '68px', width: 'auto', objectFit: 'contain' }} 
             />
           </div>
 
@@ -1075,6 +1313,7 @@ export default function App() {
           onViewPublic={handleNavigateToPublic}
           onLockDashboard={handleLockDashboard}
           onOpenAdjustMatch={() => setShowAdjustMatchModal(true)}
+          onBackToPortal={handleBackToPortal}
         />
       )}
 

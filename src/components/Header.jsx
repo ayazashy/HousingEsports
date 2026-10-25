@@ -1,6 +1,6 @@
 import React from 'react';
-import { Trophy, Users, CheckCircle, Cloud, Download, Upload, Wifi, BarChart3, Tv, Lock, Clock } from 'lucide-react';
-import logoUrl from '../utils/logo';
+import { Trophy, Users, CheckCircle, Cloud, Download, Upload, Wifi, BarChart3, Tv, Lock, Clock, ArrowRight } from 'lucide-react';
+import logoUrl, { fc27LogoUrl, housingCupLogoUrl } from '../utils/logo';
 
 export default function Header({ 
   participantsCount, 
@@ -14,7 +14,8 @@ export default function Header({
   onImportBackup,
   onViewPublic,
   onLockDashboard,
-  onOpenAdjustMatch
+  onOpenAdjustMatch,
+  onBackToPortal
 }) {
   const fileInputRef = React.useRef(null);
 
@@ -37,16 +38,41 @@ export default function Header({
   return (
     <header className="app-header">
       <div className="header-inner" style={{ flexDirection: 'column', alignItems: 'center', gap: '14px', padding: '14px 20px' }}>
-        {/* Brand Section with Official Tournament Logo (Centered & Large) */}
-        <div className="brand-section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+        
+        {/* Top Breadcrumb & Portal Back Navigation */}
+        {onBackToPortal && (
+          <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>
+            <button 
+              className="btn btn-secondary btn-sm"
+              onClick={onBackToPortal}
+              title="العودة إلى بوابة كأس السكن الرئيسية لجميع البطولات"
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: 'var(--ksu-green)' }}
+            >
+              <ArrowRight size={15} />
+              <span>← العودة إلى بوابة كأس السكن</span>
+            </button>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>كأس السكن الطلابية</span>
+              <span>›</span>
+              <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>بطولة FC27 الإلكترونية</span>
+            </div>
+          </div>
+        )}
+
+        {/* Brand Section with Separated Official Tournament Logos */}
+        <div className="brand-section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '24px', width: '100%', flexWrap: 'wrap' }}>
           <img 
-            src={logoUrl} 
-            alt="شعار بطولة كأس السكن FC27" 
-            className="brand-logo" 
-            style={{ height: '96px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.06))' }}
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
+            src={housingCupLogoUrl} 
+            alt="شعار كأس السكن" 
+            style={{ height: '76px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))' }}
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
+          <div style={{ width: '1px', height: '52px', background: 'var(--border-light)' }} />
+          <img 
+            src={fc27LogoUrl} 
+            alt="شعار بطولة FC27" 
+            style={{ height: '76px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))' }}
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         </div>
 

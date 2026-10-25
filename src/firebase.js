@@ -90,13 +90,98 @@ export async function testFirestoreWriteAuthorization(customSecret) {
   }
 }
 
+// Cups Registry Document ID
+export const CUPS_REGISTRY_DOC_ID = "ksu_housing_cups_meta";
+
+export const DEFAULT_CUPS_LIST = [
+  {
+    id: "fc27",
+    docId: TOURNAMENT_DOC_ID,
+    title: "بطولة كأس السكن: FC 25/27 الإلكترونية",
+    shortTitle: "كأس FC27 🎮",
+    game: "EA SPORTS FC 25/27",
+    category: "esports",
+    categoryLabel: "رياضة إلكترونية",
+    status: "completed",
+    statusLabel: "منتهية - الأرشيف والنتائج الرسمية 🏆",
+    dates: "22 - 24 أكتوبر 2026",
+    participantsCount: 88,
+    groupsCount: 22,
+    matchesCount: 163,
+    consolesCount: 4,
+    logo: "./fc27-logo.png",
+    champion: "ساهر الجهني",
+    runnerUp: "عبدالمحسن الظفيري",
+    description: "بطولة كرة القدم الإلكترونية الكبرى لسكان إسكان الطلاب بجامعة الملك سعود بمشاركة 88 لاعباً بنظام المجموعات وتصفيات خروج المغلوب."
+  }
+];
+
+/**
+ * Load Cups Registry from Firestore
+ */
+export async function loadCupsRegistryFromFirestore() {
+  try {
+    const docRef = doc(db, "tournaments", CUPS_REGISTRY_DOC_ID);
+    const snap = await getDoc(docRef);
+    if (snap.exists() && Array.isArray(snap.data()?.cups)) {
+      return snap.data().cups;
+    }
+    return DEFAULT_CUPS_LIST;
+  } catch (error) {
+    console.warn("Firestore loadCupsRegistry error:", error);
+    return DEFAULT_CUPS_LIST;
+  }
+}
+
+/**
+ * Save Cups Registry to Firestore
+ */
+export async function saveCupsRegistryToFirestore(cupsList, customSecret) {
+  try {
+    const docRef = doc(db, "tournaments", CUPS_REGISTRY_DOC_ID);
+    const codeToSend = getEffectiveCloudSecret(customSecret);
+    await setDoc(docRef, {
+      cups: cupsList,
+      secretCode: codeToSend,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+    return { success: true };
+  } catch (error) {
+    console.warn("Firestore saveCupsRegistry error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Subscribe to realtime updates for Cups Registry
+ */
+export function subscribeToCupsRegistry(onUpdate, onError) {
+  try {
+    const docRef = doc(db, "tournaments", CUPS_REGISTRY_DOC_ID);
+    return onSnapshot(docRef, (snap) => {
+      if (snap.exists() && Array.isArray(snap.data()?.cups)) {
+        onUpdate(snap.data().cups);
+      } else {
+        onUpdate(DEFAULT_CUPS_LIST);
+      }
+    }, (err) => {
+      console.warn("Firestore realtime error on cups registry:", err);
+      if (onError) onError(err);
+    });
+  } catch (error) {
+    console.warn("Firestore subscribe exception on cups registry:", error);
+    if (onError) onError(error);
+    return () => {};
+  }
+}
+
 /**
  * Save full tournament state to Firestore
  * Uses the dynamic authenticated secret matching Firestore rules
  */
-export async function saveTournamentToFirestore(data, customSecret) {
+export async function saveTournamentToFirestore(data, customSecret, targetDocId = TOURNAMENT_DOC_ID) {
   try {
-    const docRef = doc(db, "tournaments", TOURNAMENT_DOC_ID);
+    const docRef = doc(db, "tournaments", targetDocId);
     const codeToSend = getEffectiveCloudSecret(customSecret);
     await setDoc(docRef, {
       ...data,
@@ -114,9 +199,9 @@ export async function saveTournamentToFirestore(data, customSecret) {
  * Atomic Transaction for Multi-Admin Concurrency
  * Ensures simultaneous modifications by different admins never overwrite or intersect each other.
  */
-export async function atomicUpdateTournamentInFirestore(patchOrUpdateFn, customSecret) {
+export async function atomicUpdateTournamentInFirestore(patchOrUpdateFn, customSecret, targetDocId = TOURNAMENT_DOC_ID) {
   try {
-    const docRef = doc(db, "tournaments", TOURNAMENT_DOC_ID);
+    const docRef = doc(db, "tournaments", targetDocId);
     const codeToSend = getEffectiveCloudSecret(customSecret);
 
     await runTransaction(db, async (transaction) => {
@@ -147,7 +232,7 @@ export async function atomicUpdateTournamentInFirestore(patchOrUpdateFn, customS
  * Atomically update specific matches in Firestore
  * Merges updated matches into the latest cloud array so other admins' changes are preserved.
  */
-export async function atomicUpdateMatchesInFirestore(updatedMatchesList, customSecret) {
+export async function atomicUpdateMatchesInFirestore(updatedMatchesList, customSecret, targetDocId = TOURNAMENT_DOC_ID) {
   return atomicUpdateTournamentInFirestore((latest) => {
     const cloudMatches = latest.matches || [];
     const lookup = {};
@@ -166,15 +251,15 @@ export async function atomicUpdateMatchesInFirestore(updatedMatchesList, customS
     }
 
     return { matches: mergedMatches };
-  }, customSecret);
+  }, customSecret, targetDocId);
 }
 
 /**
  * Load tournament state from Firestore
  */
-export async function loadTournamentFromFirestore() {
+export async function loadTournamentFromFirestore(targetDocId = TOURNAMENT_DOC_ID) {
   try {
-    const docRef = doc(db, "tournaments", TOURNAMENT_DOC_ID);
+    const docRef = doc(db, "tournaments", targetDocId);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
       return snap.data();
@@ -189,9 +274,9 @@ export async function loadTournamentFromFirestore() {
 /**
  * Subscribe to realtime tournament updates from Firestore
  */
-export function subscribeToTournament(onUpdate, onError) {
+export function subscribeToTournament(onUpdate, onError, targetDocId = TOURNAMENT_DOC_ID) {
   try {
-    const docRef = doc(db, "tournaments", TOURNAMENT_DOC_ID);
+    const docRef = doc(db, "tournaments", targetDocId);
     return onSnapshot(docRef, (snap) => {
       if (snap.exists()) {
         onUpdate(snap.data());
