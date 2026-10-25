@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, X, Users, Gamepad2, Layers } from 'lucide-react';
+import { Plus, X, Users, Gamepad2, Layers, Calendar } from 'lucide-react';
 
 export default function HousingCupPortal({
   cups = [],
@@ -17,6 +17,7 @@ export default function HousingCupPortal({
     id: '',
     title: '',
     game: '',
+    dates: '22 - 24 أكتوبر 2026',
     participantsCount: 32,
     groupsCount: 8,
     matchesCount: 0,
@@ -260,6 +261,32 @@ export default function HousingCupPortal({
               e.currentTarget.style.borderColor = '#E2E8F0';
             }}
           >
+            {/* Tournament Date Badge */}
+            {cup.dates && (
+              <div style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '10px'
+              }}>
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  color: '#64748B',
+                  background: '#F1F5F9',
+                  padding: '3px 10px',
+                  borderRadius: '20px'
+                }}>
+                  <Calendar size={12} color="#64748B" />
+                  <span>{cup.dates}</span>
+                </span>
+              </div>
+            )}
+
             {/* Cup Game Logo Only */}
             <div style={{
               height: '110px',
@@ -418,6 +445,17 @@ export default function HousingCupPortal({
                   type="text" 
                   value={cupForm.logo} 
                   onChange={(e) => setCupForm({ ...cupForm, logo: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, marginBottom: '4px' }}>تاريخ إقامة البطولة:</label>
+                <input 
+                  type="text" 
+                  value={cupForm.dates || ''} 
+                  onChange={(e) => setCupForm({ ...cupForm, dates: e.target.value })}
+                  placeholder="مثال: 22 - 24 أكتوبر 2026"
                   style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
                 />
               </div>
