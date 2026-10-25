@@ -341,17 +341,20 @@ export default function StatisticsTab({
               <table className="clean-table" style={{ fontSize: '0.85rem' }}>
                 <thead>
                   <tr>
-                    <th style={{ width: '36px' }}>م</th>
+                    <th style={{ textAlign: 'center', color: '#D97706', minWidth: '90px' }}>التصنيف (ELO)</th>
+                    <th style={{ width: '40px', textAlign: 'center' }}>المركز</th>
                     <th>اللاعب</th>
-                    <th style={{ textAlign: 'center', color: '#D97706' }}>تقييم ELO</th>
                     <th style={{ textAlign: 'center' }}>التغير (Δ)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {eloLeaders.map((p, i) => (
                     <tr key={p.id}>
-                      <td className="numeric" style={{ fontWeight: 800 }}>
-                        {i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : `#${i + 1}`))}
+                      <td className="numeric" style={{ textAlign: 'center', fontWeight: 900, fontSize: '1rem', color: '#B45309' }}>
+                        {p.elo}
+                      </td>
+                      <td className="numeric" style={{ textAlign: 'center', fontWeight: 800 }}>
+                        {i === 0 ? '🥇 1' : (i === 1 ? '🥈 2' : (i === 2 ? '🥉 3' : `#${i + 1}`))}
                       </td>
                       <td>
                         {(() => {
@@ -377,9 +380,6 @@ export default function StatisticsTab({
                             </div>
                           );
                         })()}
-                      </td>
-                      <td className="numeric" style={{ textAlign: 'center', fontWeight: 900, fontSize: '1rem', color: '#B45309' }}>
-                        {p.elo}
                       </td>
                       <td className="numeric" style={{ textAlign: 'center', fontWeight: 800, color: '#15803D' }}>
                         +{p.deltaTotal}

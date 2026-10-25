@@ -64,7 +64,7 @@ export default function TvDisplayTab({
   onShowCelebration,
   isLoading = false
 }) {
-  const [activeTab, setActiveTab] = useState('consoles'); // 'consoles', 'standings', 'tree', 'scorers', 'elo'
+  const [activeTab, setActiveTab] = useState('elo'); // 'elo' (Default), 'consoles', 'standings', 'tree', 'scorers'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isAutoRotate, setIsAutoRotate] = useState(!isPublicMode);
   const [playerSearch, setPlayerSearch] = useState('');
@@ -153,7 +153,7 @@ export default function TvDisplayTab({
   // Auto-rotate tabs for projector display (18 seconds per tab)
   useEffect(() => {
     if (!isAutoRotate || isPublicMode) return;
-    const tabs = ['consoles', 'standings', 'tree', 'scorers', 'elo'];
+    const tabs = ['elo', 'consoles', 'standings', 'tree', 'scorers'];
     const timer = setInterval(() => {
       setActiveTab(prev => {
         const curIdx = tabs.indexOf(prev);
@@ -399,6 +399,22 @@ export default function TvDisplayTab({
           {/* View Selector Buttons */}
           <div className="tv-tabs-group" style={{ display: 'flex', background: 'var(--bg-subtle)', padding: '3px', borderRadius: '8px', overflowX: 'auto', maxWidth: '100%' }}>
             <button 
+              className={`btn btn-sm ${activeTab === 'elo' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ 
+                padding: '6px 14px', 
+                border: 'none', 
+                whiteSpace: 'nowrap', 
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+              onClick={() => setActiveTab('elo')}
+            >
+              <span>🏆</span>
+              <span>تصنيف لاعبي فيفا بالسكن</span>
+            </button>
+            <button 
               className={`btn btn-sm ${activeTab === 'consoles' ? 'btn-primary' : 'btn-secondary'}`}
               style={{ padding: '6px 12px', border: 'none', whiteSpace: 'nowrap' }}
               onClick={() => setActiveTab('consoles')}
@@ -425,22 +441,6 @@ export default function TvDisplayTab({
               onClick={() => setActiveTab('scorers')}
             >
               الهدافون
-            </button>
-            <button 
-              className={`btn btn-sm ${activeTab === 'elo' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ 
-                padding: '6px 14px', 
-                border: 'none', 
-                whiteSpace: 'nowrap', 
-                fontWeight: 800,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-              onClick={() => setActiveTab('elo')}
-            >
-              <span>🏆</span>
-              <span>تصنيف لاعبي فيفا بالسكن</span>
             </button>
           </div>
 

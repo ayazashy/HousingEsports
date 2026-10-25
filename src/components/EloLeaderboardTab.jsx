@@ -424,9 +424,9 @@ export default function EloLeaderboardTab({
           <table className="clean-table" style={{ fontSize: '0.88rem' }}>
             <thead>
               <tr>
-                <th style={{ width: '50px', textAlign: 'center' }}>المركز</th>
+                <th style={{ textAlign: 'center', minWidth: '95px' }}>التصنيف (ELO)</th>
+                <th style={{ width: '55px', textAlign: 'center' }}>المركز</th>
                 <th>اللاعب</th>
-                <th style={{ textAlign: 'center' }}>تقييم ELO</th>
                 <th style={{ textAlign: 'center' }}>التغير (Δ)</th>
                 <th style={{ textAlign: 'center' }}>المباريات (ف/ت/خ)</th>
                 <th style={{ textAlign: 'center' }}>الأهداف</th>
@@ -457,7 +457,32 @@ export default function EloLeaderboardTab({
                       }}
                       className="elo-table-row"
                     >
-                      {/* Rank */}
+                      {/* 1. ELO Rating (التصنيف) - First Column */}
+                      <td style={{ textAlign: 'center' }}>
+                        {p.isRanked ? (
+                          <span 
+                            className="numeric"
+                            style={{ 
+                              fontWeight: 900, 
+                              fontSize: '1rem', 
+                              padding: '4px 12px', 
+                              borderRadius: '8px',
+                              background: tier.bgColor,
+                              color: tier.color,
+                              border: `1.5px solid ${tier.borderColor}`,
+                              display: 'inline-block'
+                            }}
+                          >
+                            {p.elo}
+                          </span>
+                        ) : (
+                          <span className="badge badge-gray" style={{ fontSize: '0.74rem', padding: '3px 8px' }}>
+                            غير مصنف
+                          </span>
+                        )}
+                      </td>
+
+                      {/* 2. Rank (المركز) */}
                       <td style={{ textAlign: 'center' }}>
                         {p.rank ? (
                           <span style={{ 
@@ -472,7 +497,7 @@ export default function EloLeaderboardTab({
                         )}
                       </td>
 
-                      {/* Player & Team */}
+                      {/* 3. Player & Team */}
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           {getTeamLogoUrl(p.team) ? (
@@ -495,30 +520,6 @@ export default function EloLeaderboardTab({
                             </div>
                           </div>
                         </div>
-                      </td>
-
-                      {/* ELO Rating */}
-                      <td style={{ textAlign: 'center' }}>
-                        {p.isRanked ? (
-                          <span 
-                            className="numeric"
-                            style={{ 
-                              fontWeight: 900, 
-                              fontSize: '1rem', 
-                              padding: '3px 10px', 
-                              borderRadius: '6px',
-                              background: tier.bgColor,
-                              color: tier.color,
-                              border: `1px solid ${tier.borderColor}`
-                            }}
-                          >
-                            {p.elo}
-                          </span>
-                        ) : (
-                          <span className="badge badge-gray" style={{ fontSize: '0.74rem', padding: '3px 8px' }}>
-                            غير مصنف
-                          </span>
-                        )}
                       </td>
 
                       {/* Net Delta */}
