@@ -43,9 +43,7 @@ export default function EloLeaderboardTab({
       const q = searchQuery.trim().toLowerCase();
       list = list.filter(p => 
         (p.name && p.name.toLowerCase().includes(q)) ||
-        (p.team && p.team.toLowerCase().includes(q)) ||
-        (p.room && String(p.room).includes(q)) ||
-        (p.building && String(p.building).includes(q))
+        (p.team && p.team.toLowerCase().includes(q))
       );
     }
 
@@ -215,7 +213,7 @@ export default function EloLeaderboardTab({
               </h3>
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
-              {top2.team} • مبنى {top2.building || '—'} / غ {top2.room || '—'}
+              {top2.team}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
               <span className="numeric" style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0F172A' }}>
@@ -267,7 +265,7 @@ export default function EloLeaderboardTab({
               </h3>
             </div>
             <div style={{ fontSize: '0.85rem', color: '#854D0E', fontWeight: 700, marginBottom: '12px' }}>
-              {top1.team} • مبنى {top1.building || '—'} / غ {top1.room || '—'}
+              {top1.team}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
               <span className="numeric" style={{ fontSize: '1.75rem', fontWeight: 900, color: '#713F12' }}>
@@ -305,7 +303,7 @@ export default function EloLeaderboardTab({
                 </h3>
               </div>
               <div style={{ fontSize: '0.8rem', color: '#9A3412', marginBottom: '10px' }}>
-                {top3.team} • مبنى {top3.building || '—'} / غ {top3.room || '—'}
+                {top3.team}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                 <span className="numeric" style={{ fontSize: '1.4rem', fontWeight: 900, color: '#7C2D12' }}>
@@ -332,7 +330,7 @@ export default function EloLeaderboardTab({
             <input
               type="text"
               className="form-control"
-              placeholder="ابحث باسم اللاعب، النادي، المبنى أو الغرفة..."
+              placeholder="ابحث باسم اللاعب أو النادي..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ paddingRight: '36px', fontSize: '0.88rem', height: '40px' }}
@@ -428,7 +426,6 @@ export default function EloLeaderboardTab({
               <tr>
                 <th style={{ width: '50px', textAlign: 'center' }}>المركز</th>
                 <th>اللاعب</th>
-                <th>السكن</th>
                 <th style={{ textAlign: 'center' }}>تقييم ELO</th>
                 <th style={{ textAlign: 'center' }}>التغير (Δ)</th>
                 <th style={{ textAlign: 'center' }}>المباريات (ف/ت/خ)</th>
@@ -440,7 +437,7 @@ export default function EloLeaderboardTab({
             <tbody>
               {filteredPlayers.length === 0 ? (
                 <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
                     لم يتم العثور على أي لاعب مطابق للبحث أو الفئة المحددة.
                   </td>
                 </tr>
@@ -497,16 +494,6 @@ export default function EloLeaderboardTab({
                               {p.team || '—'}
                             </div>
                           </div>
-                        </div>
-                      </td>
-
-                      {/* Housing info */}
-                      <td>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-main)', fontWeight: 600 }}>
-                          مبنى {p.building || '—'}
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                          غرفة {p.room || '—'}
                         </div>
                       </td>
 
@@ -692,7 +679,7 @@ export default function EloLeaderboardTab({
                     </span>
                   </div>
                   <div style={{ fontSize: '0.8rem', color: '#D1FAE5', marginTop: '3px' }}>
-                    {selectedPlayer.team || 'فريق'} • مبنى {selectedPlayer.building || '—'} / غ {selectedPlayer.room || '—'}
+                    {selectedPlayer.team || 'فريق'}
                   </div>
                 </div>
               </div>

@@ -343,7 +343,6 @@ export default function StatisticsTab({
                   <tr>
                     <th style={{ width: '36px' }}>م</th>
                     <th>اللاعب</th>
-                    <th>السكن</th>
                     <th style={{ textAlign: 'center', color: '#D97706' }}>تقييم ELO</th>
                     <th style={{ textAlign: 'center' }}>التغير (Δ)</th>
                   </tr>
@@ -378,9 +377,6 @@ export default function StatisticsTab({
                             </div>
                           );
                         })()}
-                      </td>
-                      <td style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                        م {p.building || '—'} / غ {p.room || '—'}
                       </td>
                       <td className="numeric" style={{ textAlign: 'center', fontWeight: 900, fontSize: '1rem', color: '#B45309' }}>
                         {p.elo}
