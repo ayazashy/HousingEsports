@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Users, Gamepad2, Layers } from 'lucide-react';
 
 export default function HousingCupPortal({
   cups = [],
@@ -24,6 +24,10 @@ export default function HousingCupPortal({
   });
 
   const isMasterAdmin = isAdminRoute && userRole === 'master_admin';
+
+  // Calculate top aggregated stats
+  const totalParticipants = cups.reduce((sum, c) => sum + (Number(c.participantsCount) || 0), 0);
+  const totalGamesPlayed = cups.reduce((sum, c) => sum + (Number(c.matchesCount) || 0), 0);
 
   const handleOpenAdd = () => {
     setEditingCup(null);
@@ -96,13 +100,13 @@ export default function HousingCupPortal({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      padding: '40px 20px',
+      justifyContent: 'flex-start',
+      padding: '48px 20px',
       direction: 'rtl',
       fontFamily: 'inherit'
     }}>
       {/* Centered Housing Cup Main Logo */}
-      <div style={{ marginBottom: '36px', textAlign: 'center' }}>
+      <div style={{ marginBottom: '28px', textAlign: 'center' }}>
         <img 
           src="./housingcup-logo.png" 
           alt="شعار كأس السكن" 
@@ -114,6 +118,108 @@ export default function HousingCupPortal({
           }}
           onError={(e) => { e.currentTarget.src = './logo.png'; }}
         />
+      </div>
+
+      {/* Top Aggregated Stats: Total Participants & Games Played */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '16px',
+        marginBottom: '36px',
+        flexWrap: 'wrap',
+        width: '100%',
+        maxWidth: '850px'
+      }}>
+        {/* Total Participants Stat Card */}
+        <div style={{
+          background: '#FFFFFF',
+          border: '1.5px solid #E2E8F0',
+          borderRadius: '16px',
+          padding: '12px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '14px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+          minWidth: '220px'
+        }}>
+          <div style={{
+            width: '42px',
+            height: '42px',
+            borderRadius: '12px',
+            background: 'rgba(5, 150, 105, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--ksu-green)'
+          }}>
+            <Users size={22} />
+          </div>
+          <div>
+            <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0F172A', lineHeight: 1.1 }} className="numeric">
+              {totalParticipants}
+            </div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748B' }}>
+              إجمالي المشاركين
+            </div>
+          </div>
+        </div>
+
+        {/* Total Games Played Stat Card */}
+        <div style={{
+          background: '#FFFFFF',
+          border: '1.5px solid #E2E8F0',
+          borderRadius: '16px',
+          padding: '12px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '14px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+          minWidth: '220px'
+        }}>
+          <div style={{
+            width: '42px',
+            height: '42px',
+            borderRadius: '12px',
+            background: 'rgba(2, 132, 199, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#0284C7'
+          }}>
+            <Gamepad2 size={22} />
+          </div>
+          <div>
+            <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0F172A', lineHeight: 1.1 }} className="numeric">
+              {totalGamesPlayed}
+            </div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748B' }}>
+              المباريات الملعوبة
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Clear Section Header: البطولات */}
+      <div style={{
+        width: '100%',
+        maxWidth: '850px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '20px',
+        paddingBottom: '10px',
+        borderBottom: '2px solid #E2E8F0'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Layers size={22} color="var(--ksu-green)" />
+          <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0F172A', margin: 0 }}>
+            البطولات
+          </h2>
+        </div>
+        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748B' }}>
+          {cups.length} {cups.length === 1 ? 'بطولة مسجلة' : 'بطولات مسجلة'}
+        </span>
       </div>
 
       {/* Cups Grid */}
